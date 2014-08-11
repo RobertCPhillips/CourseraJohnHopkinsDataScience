@@ -8,4 +8,17 @@ corr <- function(directory, threshold = 0) {
         ## nitrate and sulfate; the default is 0
 
         ## Return a numeric vector of correlations
+        monitorsToProcess <- complete(directory)
+        monitorIdsToProcess <- monitorsToProcess[monitorsToProcess["nobs"] > threshold,1]
+        
+        result <- c()
+        
+        for(id in monitorIdsToProcess) {
+                monitorFile <- sprintf("%s/%03d.csv", directory, id)
+                monitorData <- read.csv(monitorFile)
+                correlation <- cor(monitorData["sulfate"], monitorData["nitrate"], use="complete")
+                result <- c(result, correlation)
+        }
+        
+        result
 }
