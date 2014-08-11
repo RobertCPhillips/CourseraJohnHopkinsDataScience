@@ -12,12 +12,12 @@ monitorDataMerge <- function(data1, data2) {
 
 pollutantmean <- function(directory, pollutant, id = 1:332) {
         files <- dir(directory, full.names=TRUE)[id]
-        allData = c()        
+        allData <- c()        
         
         for (f in files) {
-                fileData = read.csv(f)
-                columnData = fileData[pollutant]
-                allData = c(allData, columnData[!is.na(columnData)])
+                fileData <- read.csv(f)
+                columnData <- fileData[pollutant]
+                allData <- c(allData, columnData[!is.na(columnData)])
         }
         
         mean(allData)
@@ -35,7 +35,7 @@ pollutantmeanOrig <- function(directory, pollutant, id = 1:332) {
         ## 'pollutant' is a character vector of length 1 indicating
         ## the name of the pollutant for which we will calculate the
         ## mean; either "sulfate" or "nitrate".
-        pData = dataInFiles[pollutant]
+        pData <- dataInFiles[pollutant]
         
         ## 'id' is an integer vector indicating the monitor ID numbers
         ## to be used
