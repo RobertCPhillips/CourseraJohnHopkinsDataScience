@@ -1,5 +1,5 @@
-best <- function(state, outcome) { 
-  
+rankhospital <- function(state, outcome, num = "best") { 
+
   ## Read outcome data
   outcomes <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
   
@@ -19,14 +19,26 @@ best <- function(state, outcome) {
   if (!outcome %in% validOutcomes[,1]) 
     stop("invalid outcome")
   
-  ## Return hospital name in that state with lowest 30-day death rate
-  ## 11 - "Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack"
-  ## 17 - "Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"
-  ## 23 - "Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia"
+  if (is.null(num))
+    stop("invalid num")
   
+  r <- as.numeric(num)
+  if (num != "best" && num != "worst" && is.na(r)) 
+    stop("invalid num")
+  
+  ## Return hospital name in that state with the given rank 
+  ## 30-day death rate
+
   idx = validOutcomes[validOutcomes == outcome, 2]
   
   outcomes[, idx] <- as.numeric(outcomes[, idx])
   ordered <- outcomes[outcomes[,7] == state & !is.na(outcomes[,idx]),c(2,idx)]
-  ordered[order(ordered[,2], ordered[,1]),][1,1]
+  ordered <- ordered[order(ordered[,2], ordered[,1]),]
+  
+  l <- length(ordered[,1])
+  
+  if (num == "best") ordered[1,1]
+  else if (num == "worst") ordered[l, 1]
+  else if (num > l) NA
+  else ordered[num,1]  
 }
