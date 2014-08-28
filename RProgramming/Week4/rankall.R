@@ -1,7 +1,24 @@
-rankhospital <- function(state, outcome, num = "best") { 
-
+rankall <- function(outcome, num = "best") { 
+  
   ## Read outcome data
   outcomes <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
+  states <- unique(outcomes[,7])
+  statesCount <- length(states)
+  
+  ##DF <- data.frame(num=rep(NA, N), txt=rep("", N),  # as many cols as you need
+  ##                 stringsAsFactors=FALSE)
+  allData <- data.frame(hospital=rep(0, statesCount), state=0)
+  for (s in 1:statesCount) {
+  
+    tmp <- rankhospitalTmp(states[s], outcome, outcomes, num)
+    allData[s,] <- c(tmp, states[s])
+  }
+  
+  allData[order(allData[,2]),]
+}
+
+
+rankhospitalTmp <- function(state, outcome, outcomes, num = "best") { 
   
   ## Check that state, and outcome and num are valid
   if (is.null(state)) 
@@ -28,7 +45,7 @@ rankhospital <- function(state, outcome, num = "best") {
   
   ## Return hospital name in that state with the given rank 
   ## 30-day death rate
-
+  
   idx = validOutcomes[validOutcomes == outcome, 2]
   
   outcomes[, idx] <- as.numeric(outcomes[, idx])
