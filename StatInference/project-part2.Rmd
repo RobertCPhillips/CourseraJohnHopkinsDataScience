@@ -11,9 +11,13 @@ Analyze the ToothGrowth data in the R datasets package.
 ###Question 1
 Load the ToothGrowth data and perform some basic exploratory data analyses 
 
-```{r}
-data(ToothGrowth)
-head(ToothGrowth);unique(ToothGrowth$dose)
+```{r, echo=FALSE}
+data(ToothGrowth); head(ToothGrowth)
+boxplot(len~supp+dose,
+        data=ToothGrowth, 
+        names=c("OJ .5","VC .5","OJ 1","VC 1","OJ 2","VC 2"),
+        ylab="tooth length", 
+        xlab="supplement and dose")
 ```
 
 ###Question 2
@@ -25,6 +29,16 @@ summary(ToothGrowth[ToothGrowth$supp == "VC",])
 
 ###Question 3
 Use confidence intervals and hypothesis tests to compare tooth growth by supp and dose. (Use the techniques from class even if there's other approaches worth considering)
+```{r,echo=FALSE}
+t1 <- t.test(len~supp, data=ToothGrowth[ToothGrowth["dose"]==.5,])
+t2 <- t.test(len~supp, data=ToothGrowth[ToothGrowth["dose"]==1,])
+t3 <- t.test(len~supp, data=ToothGrowth[ToothGrowth["dose"]==2,])
+dat <- data.frame(matrix(c(t1$conf.int[1:2],t2$conf.int[1:2],t3$conf.int[1:2]),3,2,byrow=TRUE))
+colnames(dat) <- c("lower","upper");rownames(dat) <- c(".5","1","2")
+dat
+```
 
 ###Question 4
 State your conclusions and the assumptions needed for your conclusions. 
+
+Increased dosages increases tooth length.  A 2 mg dosage yields simliar mean for each type of supplement.
