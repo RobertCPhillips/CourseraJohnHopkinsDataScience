@@ -1,0 +1,30 @@
+---
+title: "Coursera Statistical Inference Project Part 2"
+author: "Robert C Phillips"
+date: "Sunday, September 21, 2014"
+output: pdf_document
+---
+
+##Problem Statement
+Analyze the ToothGrowth data in the R datasets package.
+
+###Question 1
+Load the ToothGrowth data and perform some basic exploratory data analyses 
+
+```{r}
+data(ToothGrowth)
+head(ToothGrowth);unique(ToothGrowth$dose)
+```
+
+###Question 2
+Provide a basic summary of the data.
+```{r}
+summary(ToothGrowth[ToothGrowth$supp == "OJ",])
+summary(ToothGrowth[ToothGrowth$supp == "VC",])
+```
+
+###Question 3
+Use confidence intervals and hypothesis tests to compare tooth growth by supp and dose. (Use the techniques from class even if there's other approaches worth considering)
+
+###Question 4
+State your conclusions and the assumptions needed for your conclusions. 

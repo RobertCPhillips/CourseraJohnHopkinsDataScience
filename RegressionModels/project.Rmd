@@ -1,0 +1,50 @@
+---
+title: "Coursera Regression Models Project"
+author: "Robert C Phillips"
+date: "Sunday, September 21, 2014"
+output: pdf_document
+---
+
+##Problem Statement
+You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
+1. Is an automatic or manual transmission better for MPG?
+2. Quantify the MPG difference between automatic and manual transmissions?
+
+```{r}
+data(mtcars);head(mtcars);
+```
+
+```{r, echo=FALSE}
+mtcars$am <- factor(mtcars$am)
+mtcars$cyl <- factor(mtcars$cyl)
+```
+
+###Model 1
+Model 1 provides a direct comparision between the transmission type and the mpg. This model would lead us to believe that a manual transmission (am1) would improve MPG by about 7.
+```{r}
+fit1 <- lm(mpg~am-1, data=mtcars); summary(fit1)$coef
+```
+
+###Model 2
+Model 2 adds weight to Model 1.  Weight is chosen as it often impacts MPG. This model shows that weight reduces MPG.  Also note that difference between automatic and manual is small which is an indicator that transmission does not have an impact on MPG
+```{r}
+fit2 <- lm(mpg~am+wt-1, data=mtcars); summary(fit2)$coef
+```
+
+###Model 3
+Model 3 adds cylinders to Model 2.  Cylinder count is chosen since it will often impact MPG.  Similiar to Model 2, the addition of cylinders indicates that a larger number of cylnders further reduces MPG.  Also, the difference for the transmission types is small, further indicating that transmission does not impact MPG.
+```{r}
+fit3 <- lm(mpg~am+wt+cyl-1, data=mtcars); summary(fit3)$coef
+```
+```{r, echo=FALSE}
+par(mfrow=c(2,2));plot(fit3)
+```
+
+##Conclusions
+
+1. Is an automatic or manual transmission better for MPG?
+
+Neither is a factor when other attribures are considered.
+
+2. Quantify the MPG difference between automatic and manual transmissions?
