@@ -1,0 +1,144 @@
+---
+title: "Coursera Practical Machine Learning Project"
+author: "Robert C Phillips"
+date: "Saturday, November 22, 2014"
+output: html_document
+---
+
+###Background
+Fitness devices such as Fitbit and Nike FuelBand allow for the collection of a large amount of data in a way that is easy and cost effective.  These devices typically provide features allowing the individual to track the amount of activity performed.  This leads to the idea of using simliar data to quantify how well an individual performs a particular activity.
+
+###Problem Statement
+Using the Weight Lifting Exercise Dataset (available at http://groupware.les.inf.puc-rio.br/har), can we use the data obtained from sensors on the belt, forearm, arm, and dumbell to classify the bicep curl movement into the following categories:
+
+- A - exactly according to the specification 
+- B - throwing the elbows to the front 
+- C - lifting the dumbbell only halfway 
+- D - lowering the dumbbell only halfway 
+- E - and throwing the hips to the front
+
+These categories are captured int he "classe" column in the dataset.  "classe" will be the value we will try to predict.
+
+### Loading and Partitioning the Data
+The data for this project is given in 2 seperate files, one representing a training set and one represeting a testing set. Each is loaded as follows.
+
+```{r}
+trainingFile <- read.csv("pml-training.csv")
+testingFile <- read.csv("pml-testing.csv")
+```
+
+Since this is an assignment in an ML course, the testingFile does not contain the outcome field "classe" as it is intended to be used to test the algorithm for grading purposes.  Therefore the trainingFile will be divided into a training set, a cross validation set, and a testing set to train and verify the algorithm. The data within the testingFile will be used to run the algorithm for submission to the course grader.
+
+Division of the traningFile dataset is performed as follows.
+
+```{r}
+#split (60-20-20) training file into training, cross validation, and testing
+library(caret);
+set.seed(1002)
+partition <- createDataPartition(trainingFile$classe, p = 0.60,list=FALSE)
+
+#split for training / testing
+trainingData <- trainingFile[partition,]
+testingData <- trainingFile[-partition,]
+
+#split testing into cross validation and testing
+partitionCVT <- createDataPartition(testingData$classe, p = 0.50,list=FALSE)
+crossValidData <- testingData[partitionCVT,]
+testingData <- testingData[-partitionCVT,]
+```
+
+### Determining which Features to Use
+Manual inspection of the data reveals that some of the columns in the dataset will not be useful.  An example is "user_name". 
+
+Additionally, many columns lack a signficant amount of values.  This can be seen counting NA values within the datset.  
+
+```{r}
+#which columns have more than 90% NA values
+colNACounts <- sapply(colnames(trainingFile), function(x) sum(is.na(trainingFile[,x]))/dim(trainingFile)[1] > .9)
+names(colNACounts[colNACounts])
+```
+
+This does not imply these columns do not contain useful information, however for the purposes of this exercise, these columns will not be utilized unless subsequent modeling does not yeild a useful result. 
+
+This results in using the following features which are captured in the "cols" variable.
+```{r}
+cols <- c("roll_belt","pitch_belt","yaw_belt", 
+          "gyros_belt_x","gyros_belt_y","gyros_belt_z", 
+          "accel_belt_x","accel_belt_y","accel_belt_z", 
+          "magnet_belt_x","magnet_belt_y","magnet_belt_z",
+          
+          "roll_arm","pitch_arm","yaw_arm",
+          "gyros_arm_x","gyros_arm_y","gyros_arm_z",
+          "accel_arm_x", "accel_arm_y","accel_arm_z",
+          "magnet_arm_x","magnet_arm_y","magnet_arm_z",
+          
+          "roll_dumbbell","pitch_dumbbell","yaw_dumbbell", 
+          "gyros_dumbbell_x","gyros_dumbbell_y","gyros_dumbbell_z", 
+          "accel_dumbbell_x","accel_dumbbell_y","accel_dumbbell_z", 
+          "magnet_dumbbell_x","magnet_dumbbell_y","magnet_dumbbell_z", 
+          
+          "roll_forearm","pitch_forearm","yaw_forearm", 
+          "gyros_forearm_x","gyros_forearm_y","gyros_forearm_z", 
+          "accel_forearm_x","accel_forearm_y","accel_forearm_z", 
+          "magnet_forearm_x","magnet_forearm_y","magnet_forearm_z")
+```
+
+###Training and Testing the Model
+With the data paritioned into a training set, cross validation set, and a testing set, we can now create a model using the selected features.  Random Forest is being used since we are trying to classify the observation into 1 of 5 outcomes.
+
+```{r}
+training <- trainingData[, c(cols,"classe")]
+crossValid <- crossValidData[, c(cols,"classe")]
+testing <- testingData[,c(cols,"classe")]
+
+#create model with training data
+library(randomForest);
+modelFit <- randomForest(classe~., data=training, ntree=50)
+```
+
+With the model created, we can now perform prediction using the cross validation set.  With the prediction data, we can then use a confusion matrix to determine the Out of Sample error rate of our model.
+```{r}
+#check out of sample error rate with cross validation
+cvPredict <- predict(modelFit,crossValid)
+c1 <- confusionMatrix(cvPredict, crossValid$classe)
+c1
+```
+An accuracy of 99% along with Sensitivity and Specifify values of 99% shows that the model is expected be accurate for prediction with other samples.
+
+WIth the model gives a high accruracy, we can peform prediction with the test set.  A confusion matrix is again used to show that the result is a simliar Out of Sample error rate. This gives us confidence that we are not overfitting our model.
+```{r}
+#check accuracy with testset
+cvTesting <- predict(modelFit,testing)
+c2 <- confusionMatrix(cvPredict, testing$classe)
+c2
+```
+
+###Conclusion
+These results demonstrate that it is possible to use sensor data to classify the bicep curl exercise into correctness and incorrectness categories.  This could be applied to other weightlifing exercies where the expected motion is limited to a few body parts.  An example is the bench press exercise.  This sensos data could be packaged into a new device to give the individual real-time feedback, similar to that of a trainer. 
+
+###Plots for Training Dataset
+The following boxplots are a sample of plots that were used to explore the data to determine if the selected features contain enough variation within each classe that would allow the algorithm to differentiate.
+
+```{r}
+library(ggplot2);library(gridExtra);
+
+#plots on gyros - arms
+p1 <- qplot(classe,gyros_arm_x,data=training, fill=classe,geom=c("boxplot"))
+p2 <- qplot(classe,gyros_arm_y,data=training, fill=classe,geom=c("boxplot"))
+p3 <- qplot(classe,gyros_arm_z,data=training, fill=classe,geom=c("boxplot"))
+grid.arrange(p1,p2,p3)
+```
+
+```{r}
+#plots on accel - belt
+p1 <- qplot(classe,accel_belt_x,data=training, fill=classe,geom=c("boxplot"))
+p2 <- qplot(classe,accel_belt_y,data=training, fill=classe,geom=c("boxplot"))
+p3 <- qplot(classe,accel_belt_z,data=training, fill=classe,geom=c("boxplot"))
+grid.arrange(p1,p2,p3)
+
+#plots on accel - arm
+p1 <- qplot(classe,accel_arm_x,data=training, fill=classe,geom=c("boxplot"))
+p2 <- qplot(classe,accel_arm_y,data=training, fill=classe,geom=c("boxplot"))
+p3 <- qplot(classe,accel_arm_z,data=training, fill=classe,geom=c("boxplot"))
+grid.arrange(p1,p2,p3)
+```

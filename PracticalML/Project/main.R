@@ -8,14 +8,28 @@
 
 #The goal of your project is to predict the manner in which they did the exercise
 #using data from accelerometers on the belt, forearm, arm, and dumbell.
-library(caret)
 
 trainingFile <- read.csv("pml-training.csv")
 testingFile <- read.csv("pml-testing.csv")
 
+#split (60-20-20) training file into training, cross validation, and testing
+library(caret)
 set.seed(1002)
+partition <- createDataPartition(trainingFile$classe, p = 0.60,list=FALSE)
+
+#split for training / testing
+trainingData <- trainingFile[partition,]
+testingData <- trainingFile[-partition,]
+
+#split testing into cross validation and testing
+partitionCVT <- createDataPartition(testingData$classe, p = 0.50,list=FALSE)
+crossValidData <- testingData[partitionCVT,]
+testingData <- testingData[-partitionCVT,]
 
 #columns of interest
+colNACounts <- sapply(colnames(trainingFile), function(x) sum(is.na(trainingFile[,x]))/dim(trainingFile)[1] > .9)
+names(colNACounts[colNACounts])
+
 cols <- c("roll_belt","pitch_belt","yaw_belt", 
           "gyros_belt_x","gyros_belt_y","gyros_belt_z", 
           "accel_belt_x","accel_belt_y","accel_belt_z", 
@@ -36,23 +50,29 @@ cols <- c("roll_belt","pitch_belt","yaw_belt",
           "accel_forearm_x","accel_forearm_y","accel_forearm_z", 
           "magnet_forearm_x","magnet_forearm_y","magnet_forearm_z")
 
-partition <- createDataPartition(trainingFile$classe, p = 0.60,list=FALSE)
-
-training <- trainingFile[partition, c(cols,"classe")]
-crossValid <- trainingFile[-partition, c(cols,"classe")]
-testing <- testingFile[,c(cols)]
+training <- trainingData[, c(cols,"classe")]
+crossValid <- crossValidData[, c(cols,"classe")]
+testing <- testingData[,c(cols,"classe")]
 
 #create model with training data
+library(randomForest)
 modelFit <- randomForest(classe~., data=training, ntree=50)
 
 #check accuracy with cross validation
-cv <- predict(modelFit,crossValid)
+cvPredict <- predict(modelFit,crossValid)
+c1 <- confusionMatrix(cvPredict, crossValid$classe)
+c1
 
-c1 <- confusionMatrix(cv, crossValid$classe)
-#c1
+#check accuracy with testset
+cvTesting <- predict(modelFit,testing)
+c2 <- confusionMatrix(cvPredict, testing$classe)
+c2
 
-#predict with testing data
-p <- predict(modelFit,testing)
+
+#### for grader
+#predict with grading data
+graderTesting <- testingFile[,c(cols)]
+pgrade <- predict(modelFit,graderTesting)
 
 #create files for submission
 pml_write_files = function(x){
@@ -63,7 +83,8 @@ pml_write_files = function(x){
   }
 }
 
-#pml_write_files(p)
+#pml_write_files(pgrade)
+#pgrade
 #B A B A A E D B A A B C B A E E A B B B
 
 library(ggplot2)
