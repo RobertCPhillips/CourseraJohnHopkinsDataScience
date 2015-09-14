@@ -1,6 +1,6 @@
 Tidy Data Codebook
 ==================
-Source: http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
+This dataset contains averaged values for each subject and activity.  The original dataset is provided at http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones.
 
 ###subject
 The identifier of the participant with values: 1 - 30.
@@ -9,28 +9,40 @@ The identifier of the participant with values: 1 - 30.
 The type of activity performed. The values are WALKING, WALKING_UPSTAIRS, WALKING_DOWNSTAIRS, SITTING, STANDING, LAYING.
 
 ###tBodyAcc-mean()-X
+The mean of the mean accelerometer body measurement in the X direction.
 
 ###tBodyAcc-mean()-Y
+The mean of the mean accelerometer body measurement in the Y direction.
 
 ###tBodyAcc-mean()-Z
+The mean of the mean accelerometer body measurement in the Z direction.
 
 ###tGravityAcc-mean()-X
+The mean of the mean accelerometer gravitational measurement in the X direction.
 
 ###tGravityAcc-mean()-Y
+The mean of the mean accelerometer gravitational measurement in the Y direction.
 
 ###tGravityAcc-mean()-Z
+The mean of the mean accelerometer gravitational measurement in the Z direction.
 
 ###tBodyAccJerk-mean()-X
+The mean of the mean accelerometer jerk measurement in the X direction.
 
 ###tBodyAccJerk-mean()-Y
+The mean of the mean accelerometer jerk measurement in the Y direction.
 
 ###tBodyAccJerk-mean()-Z
+The mean of the mean accelerometer jerk measurement in the Z direction.
 
 ###tBodyGyro-mean()-X
+The mean of the mean gyroscope body measurement in the X direction.
 
 ###tBodyGyro-mean()-Y
+The mean of the mean gyroscope body measurement in the Y direction.
 
 ###tBodyGyro-mean()-Z
+The mean of the mean gyroscope body measurement in the Z direction.
 
 ###tBodyGyroJerk-mean()-X
 

@@ -28,7 +28,9 @@ feature.names.meanOrStd <- feature.names[c(grep("mean", feature.names),
 colnames(data.train.x) <- feature.names
 colnames(data.test.x) <- feature.names
 
+#---------------------------------------
 #merge the training and test data
+#---------------------------------------
 require(dplyr)
 data.train.y.labeled <- left_join(data.train.y, data.activities, by="V1")
 data.test.y.labeled <- left_join(data.test.y, data.activities, by="V1")
@@ -43,9 +45,14 @@ data.all.names <- c(feature.names.meanOrStd, "subject", "activity")
 data.all <- rbind(data.train.x[,data.all.names], 
                   data.test.x[,data.all.names])
 
+#----------------------------------------
 #summarize by subject and activity
+#----------------------------------------
 data.summary <- ddply(data.all, 
                       .(subject,activity), 
                       function(x){colMeans(x[feature.names.meanOrStd])})
 
+#----------------------------------------
+#output tidy file
+#----------------------------------------
 write.table(data.summary, file="data.summary.txt", row.names=F)
